@@ -9,14 +9,20 @@ namespace BL_Core.Timer
     /// </summary>
     public class TimerModel
     {
+        /// <summary>
+        /// 任务模型id
+        /// </summary>
         public int Id;
 
         /// <summary>
-        /// 任务执行的事件
+        /// 任务执行的时间
         /// </summary>
         public long Time;
 
-        private CallBack call;//委托
+        /// <summary>
+        /// 当定时器到达时间后的触发
+        /// </summary>
+        private CallBack call;
 
         public TimerModel(int id, long time, CallBack call)
         {

@@ -25,10 +25,6 @@ namespace BL_Core.Timer
             }
         }
 
-        /// <summary>
-        /// 实现定时器的主要功能就是这个Timer类
-        /// </summary>
-        private System.Timers.Timer timer;
 
         /// <summary>
         /// 这个字典存储： 任务id  和  任务模型 的映射
@@ -45,9 +41,13 @@ namespace BL_Core.Timer
         /// </summary>
         private ConcurrentInt id = new ConcurrentInt(-1);
 
+        /// <summary>
+        /// 实现定时器的主要功能就是这个Timer类
+        /// </summary>
+        private System.Timers.Timer timer;
         public TimerManager()
         {
-            timer = new System.Timers.Timer(10);
+            timer = new System.Timers.Timer(100);//默认100毫秒监听一次
             timer.Elapsed += Timer_Elapsed;
         }
 
@@ -70,16 +70,16 @@ namespace BL_Core.Timer
 
             foreach (var model in idModelDict.Values)
             {
-                // t1:   10 + 2 = 12
-                // t2:   11
-                // t2:   13
+
                 if (model.Time <= DateTime.Now.Ticks)
+                {
                     model.Run();
+                }
             }
         }
 
         /// <summary>
-        /// 添加定时任务 指定触发的时间  2017年8月6日18:44:33
+        /// 添加定时任务 指定延迟的时间  2017年8月6日18:44:33
         /// </summary>
         public void AddTimerEvent(DateTime datetime,CallBack call)
         {
@@ -100,5 +100,19 @@ namespace BL_Core.Timer
             idModelDict.TryAdd(model.Id, model);
         }
 
+        /// <summary>
+        /// 添加移除指定id 的定时任务
+        /// </summary>
+        /// <param name="id"></param>
+        public void AddRemoveTimeEvent(int id) {
+
+            if (removeList.Contains(id))
+            {
+                removeList[id] = id;
+            }
+            else {
+                removeList.Add(id);
+            }
+        }
     }
 }
