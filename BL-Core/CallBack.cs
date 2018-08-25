@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace BL_Core.CallBack
+namespace BL_Core
 {
     /// <summary>
     /// 无参委托
