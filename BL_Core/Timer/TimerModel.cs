@@ -40,11 +40,20 @@ namespace BL_Core.Timer
         /// </summary>
         public  CallBack CallBack { private set; get; }
 
-        public TimerModel( float time, CallBack call)
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="time">延迟时间</param>
+        /// <param name="call">回调函数</param>
+        /// <param name="isOnce">是否只执行一次</param>
+        /// <param name="isScale">是否忽略时间缩放</param>
+        public TimerModel(float time, CallBack call, bool isOnce = false,bool isScale=true)
         {
             this.Id = _id.Add_Get();
             this.DelayTime = time;
             this.CallBack = call;
+            this.IsOnce = isOnce;
+            this.IsIgnoreTimeScaling = isScale;
         }
 
         /// <summary>
@@ -52,7 +61,7 @@ namespace BL_Core.Timer
         /// </summary>
         public void Run()
         {
-            call();
+            CallBack();
         }
     }
 }

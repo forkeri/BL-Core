@@ -70,8 +70,8 @@ namespace BL_Core.Timer
 
             foreach (var model in idModelDict.Values)
             {
-                Debug.LogFormat("modeltime：{0}====当前时间：{1}",model.Time, DateTime.Now.Millisecond);
-                if (model.Time <= DateTime.Now.Millisecond)
+                Debug.LogFormat("modeltime：{0}====当前时间：{1}",model.DelayTime, DateTime.Now.Millisecond);
+                if (model.DelayTime <= DateTime.Now.Millisecond)
                 {
                     model.Run();
                     AddRemoveTimeEvent(model.Id);
@@ -97,7 +97,7 @@ namespace BL_Core.Timer
         /// <param name="timeDelegate"></param>
         public void AddTimerEvent(long delayTime, CallBack call)
         {
-            TimerModel model = new TimerModel(id.Add_Get(),DateTime.Now.Millisecond + delayTime, call);
+            TimerModel model = new TimerModel(DateTime.Now.Millisecond + delayTime, call);
             idModelDict.Add(model.Id, model);
         }
 
