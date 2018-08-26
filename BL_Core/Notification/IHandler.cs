@@ -22,8 +22,17 @@ namespace BL_Core.Notification
     /// 对接口进行扩展，方便实现接口之后的注册操作
     /// </summary>
     public static class HandlerExtend {
+        /// <summary>
+        /// 注册进通知中心
+        /// </summary>
+        /// <param name="handler"></param>
+        /// <param name="cmd"></param>
         public static void RegistCmd(this IHandler handler,ushort cmd) {
+            NoticeCenter.Default.RegistCmd(cmd, handler);
+        }
 
+        public static void RemoveCmd(this IHandler handler) {
+            NoticeCenter.Default.RemoveHandler(handler);
         }
     }
 }
