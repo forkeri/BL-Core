@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using BL_Core;
-
+using UnityEngine;
 namespace BL_Core.Timer
 {
     /// <summary>
@@ -16,10 +14,12 @@ namespace BL_Core.Timer
         {
             get
             {
+                if (instance == null)
+                {
+                    instance = new TimerManager();
+                }
                 lock (instance)
                 {
-                    if (instance == null)
-                        instance = new TimerManager();
                     return instance;
                 }
             }
@@ -49,6 +49,7 @@ namespace BL_Core.Timer
         {
             timer = new System.Timers.Timer(100);//默认100毫秒监听一次
             timer.Elapsed += Timer_Elapsed;
+            timer.Enabled = true;
         }
 
         /// <summary>
@@ -60,7 +61,6 @@ namespace BL_Core.Timer
         {
             lock (removeList)
             {
-                TimerModel tmpModel = null;
                 foreach (var id in removeList)
                 {
                     idModelDict.Remove(id);
@@ -70,10 +70,11 @@ namespace BL_Core.Timer
 
             foreach (var model in idModelDict.Values)
             {
-
-                if (model.Time <= DateTime.Now.Ticks)
+                Debug.LogFormat("modeltime：{0}====当前时间：{1}",model.Time, DateTime.Now.Millisecond);
+                if (model.Time <= DateTime.Now.Millisecond)
                 {
                     model.Run();
+                    AddRemoveTimeEvent(model.Id);
                 }
             }
         }
@@ -83,7 +84,7 @@ namespace BL_Core.Timer
         /// </summary>
         public void AddTimerEvent(DateTime datetime, CallBack call)
         {
-            long delayTime = datetime.Ticks - DateTime.Now.Ticks;
+            long delayTime = datetime.Millisecond - DateTime.Now.Millisecond;
             if (delayTime <= 0)
                 return;
             AddTimerEvent(delayTime, call);
@@ -96,7 +97,7 @@ namespace BL_Core.Timer
         /// <param name="timeDelegate"></param>
         public void AddTimerEvent(long delayTime, CallBack call)
         {
-            TimerModel model = new TimerModel(id.Add_Get(), DateTime.Now.Ticks + delayTime, call);
+            TimerModel model = new TimerModel(id.Add_Get(),DateTime.Now.Millisecond + delayTime, call);
             idModelDict.Add(model.Id, model);
         }
 
