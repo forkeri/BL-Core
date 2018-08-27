@@ -50,11 +50,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CallBack.cs" />
+    <Compile Include="CallBackDelegate.cs" />
     <Compile Include="Notification\IHandler.cs" />
     <Compile Include="Notification\NoticeCenter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Singleton.cs" />
+    <Compile Include="SingletonBehaviour.cs" />
     <Compile Include="Test.cs" />
     <Compile Include="Timer\ConcurrentInt.cs" />
     <Compile Include="Timer\TimerManager.cs" />

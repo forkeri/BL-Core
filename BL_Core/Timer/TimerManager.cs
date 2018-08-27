@@ -1,30 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 namespace BL_Core.Timer
 {
     /// <summary>
     /// 计时器管理者
     /// </summary>
-    public class TimerManager
+    public class TimerManager:Singleton<TimerManager>
     {
-        //单例
-        private static TimerManager instance = null;
-        public static TimerManager Instance
-        {
-            get
-            {
-                if (instance == null)
-                {
-                    instance = new TimerManager();
-                }
-                lock (instance)
-                {
-                    return instance;
-                }
-            }
-        }
-
 
         /// <summary>
         /// 这个字典存储： 任务id  和  任务模型 的映射
@@ -32,90 +16,94 @@ namespace BL_Core.Timer
         private Dictionary<int, TimerModel> idModelDict = new Dictionary<int, TimerModel>();
 
         /// <summary>
-        /// 要移除的任务ID列表
+        /// 获取定时任务队列
         /// </summary>
-        private List<int> removeList = new List<int>();
-
-        /// <summary>
-        /// 用来表示ID
-        /// </summary>
-        private ConcurrentInt id = new ConcurrentInt(-1);
-
-        /// <summary>
-        /// 实现定时器的主要功能就是这个Timer类
-        /// </summary>
-        private System.Timers.Timer timer;
-        public TimerManager()
-        {
-            timer = new System.Timers.Timer(100);//默认100毫秒监听一次
-            timer.Elapsed += Timer_Elapsed;
-            timer.Enabled = true;
+        /// <returns></returns>
+        public List<TimerModel> GetTimerList() {
+            return idModelDict.Values.ToList();
         }
 
-        /// <summary>
-        /// 达到时间间隔时候触发
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+       /// <summary>
+       /// 添加定时任务
+       /// </summary>
+       /// <param name="delayTime">延时</param>
+       /// <param name="call">回调函数，带一个float参数</param>
+       /// <param name="isOnce">是否只执行一次</param>
+       /// <param name="isScale">是否忽略时间缩放</param>
+       /// <returns></returns>
+        public int AddTimerEvent(float  delayTime, CallBack<float> call,bool isOnce=false,bool isScale=false)
         {
-            lock (removeList)
-            {
-                foreach (var id in removeList)
-                {
-                    idModelDict.Remove(id);
-                }
-                removeList.Clear();
-            }
-
-            foreach (var model in idModelDict.Values)
-            {
-                Debug.LogFormat("modeltime：{0}====当前时间：{1}",model.DelayTime, DateTime.Now.Millisecond);
-                if (model.DelayTime <= DateTime.Now.Millisecond)
-                {
-                    model.Run();
-                    AddRemoveTimeEvent(model.Id);
-                }
-            }
-        }
-
-        /// <summary>
-        /// 添加定时任务 指定延迟的时间  2017年8月6日18:44:33
-        /// </summary>
-        public void AddTimerEvent(DateTime datetime, CallBack call)
-        {
-            long delayTime = datetime.Millisecond - DateTime.Now.Millisecond;
-            if (delayTime <= 0)
-                return;
-            AddTimerEvent(delayTime, call);
-        }
-
-        /// <summary>
-        /// 添加定时任务 指定延迟的时间  40s
-        /// </summary>
-        /// <param name="delayTime">毫秒！！</param>
-        /// <param name="timeDelegate"></param>
-        public void AddTimerEvent(long delayTime, CallBack call)
-        {
-            TimerModel model = new TimerModel(DateTime.Now.Millisecond + delayTime, call);
+            TimerModel model = new TimerModel(delayTime,call,isOnce,isScale);
+            model.RecalculateTime();
             idModelDict.Add(model.Id, model);
+            return model.Id;
         }
+
+       
 
         /// <summary>
         /// 添加移除指定id 的定时任务
         /// </summary>
         /// <param name="id"></param>
-        public void AddRemoveTimeEvent(int id)
+        public TimerModel RemoveTimeEvent(int id)
         {
-
-            if (removeList.Contains(id))
+            for (int i = 0; i < idModelDict.Count; i++)
             {
-                removeList[id] = id;
+                if (idModelDict.ContainsKey(id))
+                {
+                    var model = idModelDict[id];
+                    idModelDict.Remove(id);
+                    return model;
+                }
             }
-            else
+            Debug.LogFormat("当前不存在该定时任务，定时任务Id：{0}", id);
+            return null;
+        }
+
+        /// <summary>
+        /// 移除定时任务
+        /// </summary>
+        /// <param name="call">回调函数</param>
+        /// <returns></returns>
+        public TimerModel RemoveTimeEvent(CallBack<float> call)
+        {
+            for (int i = 0; i < idModelDict.Count; i++)
             {
-                removeList.Add(id);
+                if (idModelDict[i].CallBack == call) {
+                    var model = idModelDict[i];
+                    idModelDict.Remove(model.Id);
+                    return model;
+                }
+            }
+            Debug.LogFormat("当前不存在该定时任务，定时任务CallBack is：{0}", call.Method.Name);
+            return null;
+        }
+
+        /// <summary>
+        /// 更新执行
+        /// </summary>
+        internal void Update() {
+            for (int i = idModelDict.Count - 1; i >= 0; i--)
+            {
+                if (idModelDict[i] == null)
+                {
+                    idModelDict.Remove(i);
+                    continue;
+                }
+                if (idModelDict[i].IsComplete())
+                {
+                    idModelDict[i].CallBack?.Invoke(idModelDict[i].RealInterval);
+                    if (idModelDict[i] != null)
+                    {
+                        if (idModelDict[i].IsOnce)
+                            idModelDict[i] = null;
+                        else
+                            idModelDict[i].RecalculateTime();
+                    }
+                }
             }
         }
+
+
     }
 }

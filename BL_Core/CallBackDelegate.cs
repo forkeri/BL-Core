@@ -24,4 +24,10 @@ namespace BL_Core
     /// 可选参数委托
     /// </summary>
     public delegate void CallBacks(params object[] objs);
+
+    
+    public static class CallBackDelegate {
+       
+       
+    }
 }
