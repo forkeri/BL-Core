@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CallBackDelegate.cs" />
+    <Compile Include="IO\ByteArray.cs" />
     <Compile Include="Notification\IHandler.cs" />
     <Compile Include="Notification\NoticeCenter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
