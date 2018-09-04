@@ -434,6 +434,22 @@ namespace BL_Core.IO
             }
         }
 
+        /// <summary>
+        /// 检查
+        /// </summary>
+        /// <returns>-1：数据读取超出，错误的数据 ;>=0:还未读取的长度</returns>
+        public int Check()
+        {
+            if (readPos > writePos)
+            {
+                return -1;
+            }
+            else
+            {
+                return writePos - readPos;
+            }
+        }
+
         //清空【读完长度（长度+包体的长度）时】
         public void Clear()
         {
